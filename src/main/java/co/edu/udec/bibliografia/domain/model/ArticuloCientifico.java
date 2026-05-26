@@ -1,9 +1,11 @@
 package co.edu.udec.bibliografia.domain.model;
 
+import co.edu.udec.bibliografia.domain.events.CopiaFisicaRegistrada;
 import co.edu.udec.bibliografia.domain.exceptions.DominioException;
 import co.edu.udec.bibliografia.domain.valueobjects.CorreoElectronico;
 import co.edu.udec.bibliografia.domain.valueobjects.Ubicacion;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +17,9 @@ public abstract class ArticuloCientifico {
     protected CorreoElectronico correoContacto;
     protected boolean tieneCopia;
     protected Ubicacion ubicacionCopia;
+
+    // Lista para guardar los eventos de dominio que ocurran
+    private final List<Object> domainEvents = new ArrayList<>();
 
     public ArticuloCientifico(String id, String titulo) {
         if (id == null || id.isBlank()) throw new DominioException("El ID del artículo es obligatorio");
@@ -36,10 +41,14 @@ public abstract class ArticuloCientifico {
         if (ubicacion == null) throw new DominioException("La ubicación es obligatoria para registrar una copia física");
         this.tieneCopia = true;
         this.ubicacionCopia = ubicacion;
+
+        // ¡Aquí disparamos el evento de dominio!
+        this.domainEvents.add(new CopiaFisicaRegistrada(this.id, ubicacion.descripcion(), Instant.now()));
     }
 
     public String getId() { return id; }
     public String getTitulo() { return titulo; }
     public boolean isTieneCopia() { return tieneCopia; }
     public Ubicacion getUbicacionCopia() { return ubicacionCopia; }
+    public List<Object> getDomainEvents() { return domainEvents; }
 }
